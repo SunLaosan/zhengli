@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="jquery-1.8.2.min.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div>
+				
+				<i>上传图片:</i>
+					<div class="img">
+						<!--显示图片-->
+						<img class="upImg" src="__INDEX__images/shangchuan.png" id="imgurl" style="width:2.7rem;height: 2.7rem;"/>
+						<!--上传按钮-->
+		                <input type="file" name="img" type="file" id="img_yq" style="position: relative;height: 2.7rem;width: 2.7rem;background: red;top: -2.8rem;opacity: 0;display: block;" ></input>
+		                <!--隐藏域用于提交-->
+				        <input type="hidden" ame="cun_image" value="" id="imgs"></input>
+					</div>
+			</div>
+	</body>
+</html>
+<script type="text/javascript" src="jquery.ui.widget.js"></script>
+<script type="text/javascript" src="jquery.iframe-transport.js"></script>
+<script type="text/javascript" src="jquery.fileupload.js"></script>
+<script>
+    $(function () {
+        var u = "{:url('register/imageUpload')}";
+        $('#img_yq').fileupload({
+            url:u,
+            dataType:"json",
+            done:function(evt,data){
+                if (data.result.error == 1) {
+                    $("#imgurl").attr('src','__IMAGE__'+data.result.info);
+                    $("#imgs").val(data.result.info);
+                }else if(data.result.error==0){
+                    alert("上传失败");
+                }else if(data.result.error==2){
+                    alert(data.result.errorInfo);
+                }
+            }
+        });
+    })
+  
+</script>
