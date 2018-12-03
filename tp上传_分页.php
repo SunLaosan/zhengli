@@ -29,7 +29,7 @@ function upload($name)
     .pagination .active{background-color:#337AB7;color: white}  
     .pagination .disabled{color: red;}  
 </style>
-//追加分页css文件
+//追加分页css文件 解决加载顺序产生的分页没有样式问题
 <script>
     function addCss()
     {

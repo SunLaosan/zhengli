@@ -114,5 +114,100 @@ class CommonService extends Controller
             return self::returnJsonp(0,$error);
         }
     }
+    /*
+     * 判断重复
+     *
+     * */
+    static function checkRepeat($table,$where,$wheres='1=1')
+    {
+        $r=db($table)->where($where)->where($wheres)->count();
+        return $r;
+    }
 
+    /**修改数据
+     * @param $table
+     * @param $where两个where条件配合使用 一个数组 一个字符串
+     * @param $wheres
+     * @param $data
+     * @return int|string
+     */
+    static function valueUpdate($table,$where,$data,$wheres='1=1')
+    {
+        $r=db($table)->where($where)->where($wheres)->update($data);
+        return $r;
+    }
+
+    /**
+     * 查询单条数据
+     * @param $table
+     * @param $where
+     * @param string $wheres
+     * @return array|false|\PDOStatement|string|\think\Model
+     */
+    static function valueFind($table, $where, $wheres = '1=1', $field = '*')
+    {
+        $r = db($table)->where($where)->where($wheres)->field($field)->find();
+        return $r;
+    }
+
+    /**
+     * 查询某个值
+     * @param $table
+     * @param $where
+     * @param $param
+     * @param string $wheres
+     * @return mixed
+     */
+    static function selectValue($table, $where, $param, $wheres = '1=1')
+    {
+        $r = db($table)->where($where)->where($wheres)->value($param);
+        return $r;
+    }
+
+    /**
+     * 返回结果的封装判断
+     * @param $r
+     * @return \think\response\Json
+     */
+    static function returnJudge($r, $content, $remarks = '无')
+    {
+        if($r){
+            //LogService::log($content, $remarks);
+            return self::returnData(1,'操作成功');
+        }else{
+            return self::returnData(0,'操作失败');
+        }
+    }
+
+    /**
+     * 添加数据
+     * @param $table
+     * @param $data
+     * @return int|string
+     */
+    static function valueInsert($table, $data)
+    {
+        //判断传入的是一维数组还是二维数组
+        if (count($data) == count($data,1)) {
+            $r = db($table)->insertGetId($data);
+        } else {
+            $r = db($table)->insertAll($data);
+        }
+
+        return $r;
+    }
+
+    /**
+     * 删除数据 真删除
+     * @param $table
+     * @param $where
+     * @param string $wheres
+     * @return int
+     */
+    static public function delValue($table, $where, $wheres = '1=1')
+    {
+        $r = db($table)->where($where)->where($wheres)->delete();
+
+        return $r;
+    }
 }
