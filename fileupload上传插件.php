@@ -21,7 +21,7 @@ $(function () {
         multipart:true,
         done: function (e, data) {
             //console.log(data.result);
-            $('#image9').val(data.result.url);
+            $('#image9').val(data.result.url);//后台处理时取到上传后的文件名  return json(['url'=>$url]);  直接以json格式返回即可 前端自带result
             $('#image1').attr('src',"__IMAGE__"+data.result.url);
         }
     });
