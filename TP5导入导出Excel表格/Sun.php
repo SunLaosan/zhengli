@@ -8,22 +8,23 @@ namespace app\admin\controller;
  */
 use think\Db;
 use app\admin\controller\Base;
-class Sun //表格导出!!!
+class Sun
 {
 
     //导入
-    public  $imporpExcelPath ='./expressTeml (9).xlsx'; //导入的excel表格所在路径 一般是先经过上传文件处理后产生的路径  注意不能以/开头 如果有 要去掉
-    public  $importColumnList = ['A'=>'user_phone','B'=>'user_name','C'=>'user_sex','D'=>'user_city','E'=>'user_alipay_account']; //需要导入的excel表头对应mysql字段名
+    public  $imporpExcelPath ='./test.xlsx'; //导入的excel表格所在路径 一般是先经过上传文件处理后产生的路径  注意不能以/开头 如果有 要去掉
+    public  $importColumnList = ['A'=>'user_phone','B'=>'user_name','C'=>'user_sex','D'=>'user_city','E'=>'user_account']; //需要导入的excel表头对应mysql字段名
 
 
     //导出
     public  $exportData = [];//需要导出的数据
     public  $excelTableName = '测试导出表格';
     public  $excelColumnKeyAndVlue = [['A','ID','shop_id','25'],['B','店名','shop_name','25'],['C','电话','shop_phone','25'],['D','商家地址','shop_address','25']];
+    public  $headlist = ['ID','店名','电话','商家地址'];//头部
 
     //导出函数
     public function export(){
-        //$res =   Db::table('dy_shop')->field('shop_id,shop_name,shop_phone,shop_address')->select();//获取数据源
+        //$res = sql语句;//获取数据源
         //$this->excelTableName ='测试导出表格';//导出文件名
         //$this->exportData = $res;//数据
         $this->excel();
@@ -41,7 +42,6 @@ class Sun //表格导出!!!
 
 
     /**生成excel表导出
-     * @param $data 需要导出的数据
      * @throws \PHPExcel_Reader_Exception
      */
     public function excel()
@@ -72,22 +72,61 @@ class Sun //表格导出!!!
 
         }
 
-        //底部注释部分
-//        $PHPSheet->setCellValue("A".(count($this->exportData)+5),"1.物流公司的名称，请使用模板中列出的标准命名方式，否则将会影响订单中物流信息显示。");
-//        $PHPSheet->setCellValue("A".(count($this->exportData)+6),"2.不需要的物流公司的一整行都可以删除");
-//        $PHPSheet->setCellValue("A".(count($this->exportData)+7),"3.您修改的地方是订单编号，和物流单号(填写单号时候要对应物流名称)");
-//        $PHPSheet->setCellValue("A".(count($this->exportData)+8),"4.这四行文字说明可以不用动");
-
-
-
-
         $PHPWriter = \PHPExcel_IOFactory::createWriter($PHPExcel,"Excel2007");//创建生成的格式
         header("Content-Disposition: attachment;filename='".$this->excelTableName.".xlsx'");//下载下来的表格名
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $PHPWriter->save("php://output"); //表示在$path路径下面生成demo.xlsx文件
 
     }
+    /**
+     * 导出csv
+     * csv文件同txt文件 内存消耗小 可一次导出大量数据
+     */
+    function csv_export() {
 
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'.$this->excelTableName.'.csv"');
+        header('Cache-Control: max-age=0');
+
+        //打开PHP文件句柄,php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+
+        //输出Excel列名信息
+        foreach ($this->headlist as $key => $value) {
+            //CSV的Excel支持GBK编码，一定要转换，否则乱码
+            $headlist[$key] = iconv('utf-8', 'gbk', $value);
+        }
+
+        //将数据通过fputcsv写到文件句柄
+        fputcsv($fp, $headlist);
+
+        //计数器
+        $num = 0;
+
+        //每隔$limit行，刷新一下输出buffer，不要太大，也不要太小
+        $limit = 100000;
+
+        //逐行取出数据，不浪费内存
+        $count = count($this->exportData);
+        for ($i = 0; $i < $count; $i++) {
+
+            $num++;
+
+            //刷新一下输出buffer，防止由于数据过多造成问题
+            if ($limit == $num) {
+                ob_flush();
+                flush();
+                $num = 0;
+            }
+
+            $row = $this->exportData[$i];
+            foreach ($row as $key => $value) {
+                $row[$key] = iconv('utf-8', 'gbk', $value);
+            }
+
+            fputcsv($fp, $row);
+        }
+    }
 
     /**
      * 读取excel数据 返回数组
